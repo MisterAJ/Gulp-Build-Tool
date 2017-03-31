@@ -9,12 +9,27 @@ const gulp = require('gulp'),
       maps = require('gulp-sourcemaps'),
   imageMin = require('gulp-imagemin'),
        del = require('del'),
-   connect = require('gulp-connect');
+   connect = require('gulp-connect'),
+      lint = require('gulp-eslint');
 
 /*
  As a developer, I should be able to run the gulp scripts command at the command line to concatenate, minify, and
  copy all of the project’s JavaScript files into an all.min.js file that is then copied to the dist/scripts folder.
  */
+
+/*
+ As a developer, when I run the gulp scripts command at the command line, all of my project’s
+ JavaScript files will be linted using ESLint and if there’s an error, the error will output to
+ the console and the build process will be halted.
+ */
+
+const rules = {
+    "rules":{
+        "camelcase": 1,
+        "comma-dangle": 2,
+        "quotes": 0
+    }
+};
 
 gulp.task('scripts', function () {
     return gulp.src([
@@ -23,6 +38,9 @@ gulp.task('scripts', function () {
         'js/global.js'])
         .pipe(maps.init())
         .pipe(concat('all.min.js'))
+        .pipe(lint(rules))
+        .pipe(lint.format('checkstyle'))
+        .pipe(lint.failOnError())
         .pipe(uglify())
         .pipe(maps.write('./'))
         .pipe(gulp.dest('dist/scripts'))
@@ -113,8 +131,4 @@ gulp.task('watch', () => {
     gulp.watch(['js/**/*.js'],['scripts'])
 });
 
-/*
- As a developer, when I run the gulp scripts command at the command line, all of my project’s
- JavaScript files will be linted using ESLint and if there’s an error, the error will output to
- the console and the build process will be halted.
- */
+
